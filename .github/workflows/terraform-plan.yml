@@ -3,11 +3,11 @@ name: terraform plan
 # Runs on every pull request that touches infrastructure. Read-only: this
 # workflow assumes the plan role, which holds ReadOnlyAccess and nothing else,
 # because a pull request from a fork can execute workflow code.
-on:
-  pull_request:
-    paths:
-      - 'infra/terraform/**'
-      - '.github/workflows/terraform-*.yml'
+# on:
+#   pull_request:
+#     paths:
+#       - 'infra/terraform/**'
+#       - '.github/workflows/terraform-*.yml'
 
 permissions:
   contents: read

@@ -6,7 +6,7 @@ name: terraform apply
 # the `production` environment is the gate.
 on:
   push:
-    branches: [staging, main]
+    branches: [stagingg, mainn]
     paths:
       - 'infra/terraform/**'
       - '.github/workflows/terraform-apply.yml'

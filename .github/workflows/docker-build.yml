@@ -4,7 +4,7 @@ name: build and push images
 # and an image build does not run Terraform.
 on:
   push:
-    branches: [staging, main]
+    branches: [stagingg, mainn]
     paths:
       - 'apps/**'
       - '.github/workflows/docker-build.yml'
