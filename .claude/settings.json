@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(aws configure *)",
+      "Bash(aws sts *)",
+      "Bash(pnpm -v)",
+      "Bash(docker info *)",
+      "Read(//home/CTDeploy/.aws/**)",
+      "Bash(timeout 30 npm view @nestjs/core version)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(npx jest *)"
+    ]
+  }
+}

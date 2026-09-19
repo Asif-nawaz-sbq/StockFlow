@@ -1,0 +1,89 @@
+# Checkov configuration.
+#
+# Every skip below is a deliberate trade-off with a reason, not a way to get a
+# green tick. Anything not listed here fails the build.
+
+framework:
+  - terraform
+
+compact: true
+quiet: true
+
+skip-check:
+  # --- No domain, therefore no certificate -------------------------------
+  # There is no ACM certificate because there is no domain, so the listener
+  # serves HTTP and there is nothing to redirect to. Both resolve themselves
+  # the moment certificate_arn is set.
+  - CKV2_AWS_20   # ALB should redirect HTTP to HTTPS
+  - CKV_AWS_103   # ALB should use TLS 1.2 or better
+  - CKV_AWS_2     # ALB listener should use HTTPS
+
+  # --- Public load balancer ----------------------------------------------
+  # Port 80 open to the world is the entire purpose of an internet-facing
+  # load balancer. WAF sits in front of it.
+  - CKV_AWS_260   # security group allows ingress from 0.0.0.0/0 to port 80
+
+  # --- Customer-managed KMS keys -----------------------------------------
+  # Everything below is encrypted at rest with AWS-managed keys. A CMK per
+  # service would add roughly USD 1/month each for no threat-model gain in a
+  # single-account environment that is destroyed after verification.
+  - CKV_AWS_145   # S3 encrypted with KMS
+  - CKV_AWS_136   # ECR encrypted with KMS
+  - CKV_AWS_158   # CloudWatch log group encrypted with KMS
+  - CKV_AWS_149   # Secrets Manager encrypted with CMK
+  - CKV_AWS_191   # ElastiCache encrypted with CMK
+  - CKV_AWS_354   # RDS Performance Insights encrypted with CMK
+
+  # --- Throwaway environment ---------------------------------------------
+  # Deletion protection and long retention actively get in the way of a stack
+  # that exists to be destroyed. Production values live in production.tfvars.
+  - CKV_AWS_293   # RDS deletion protection
+  - CKV_AWS_338   # log retention of at least one year
+  - CKV_AWS_157   # RDS Multi-AZ (true in production, false in staging)
+  - CKV_AWS_118   # RDS enhanced monitoring (per-metric cost)
+  - CKV_AWS_18    # S3 access logging on the state bucket
+
+  # --- Secret rotation ----------------------------------------------------
+  # Rotating the JWT keys or the Redis AUTH token needs a rotation Lambda and
+  # a coordinated restart. Out of scope; the secrets are generated, never
+  # transcribed, and the environment is short-lived.
+  - CKV2_AWS_57   # Secrets Manager automatic rotation
+
+  # --- CI role permissions ------------------------------------------------
+  # The apply role is PowerUserAccess plus a scoped slice of IAM, and carries
+  # an explicit Deny on modifying the CI roles themselves. Terraform cannot
+  # create task roles without these actions.
+  - CKV_AWS_109   # IAM policy allows permissions management
+  - CKV_AWS_110   # IAM policy allows privilege escalation
+  - CKV_AWS_111   # IAM write access without constraint
+  - CKV_AWS_356   # IAM policy allows all resources
+
+  # --- False positives ----------------------------------------------------
+  # The task security group is created in the alb module and attached by the
+  # ecs module, which checkov cannot follow across a module boundary.
+  - CKV2_AWS_5    # security group not attached to a resource
+
+  # Log4Shell is covered: AWSManagedRulesKnownBadInputsRuleSet contains the
+  # Log4JRCE rule. Checkov only looks for a rule literally named for it.
+  - CKV_AWS_192   # WAF should prevent Log4j2 message lookup
+
+  # Enforced by rds.force_ssl = 1 in the parameter group, which checkov does
+  # not correlate with the instance.
+  - CKV2_AWS_69   # RDS encryption in transit
+
+  # --- Internal hop is plain HTTP ----------------------------------------
+  # TLS terminates at the load balancer. Traffic from there to the tasks stays
+  # inside private subnets and is restricted to the task security group.
+  # End-to-end TLS would mean managing certificates inside the containers.
+  - CKV_AWS_378   # target group uses HTTP
+
+  # --- Throwaway environment, continued ----------------------------------
+  - CKV_AWS_150   # ALB deletion protection
+  - CKV_AWS_144   # S3 cross-region replication
+  - CKV2_AWS_62   # S3 event notifications
+
+  # --- False positive -----------------------------------------------------
+  # The web ACL is associated with this load balancer by
+  # aws_wafv2_web_acl_association in the waf module. Checkov does not follow
+  # the association across modules.
+  - CKV2_AWS_28   # public ALB protected by WAF

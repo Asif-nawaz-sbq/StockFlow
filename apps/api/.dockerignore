@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+.git
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Incremental build cache. If this reaches the image, TypeScript decides the
+# output is already current and emits nothing, leaving no dist/.
+*.tsbuildinfo

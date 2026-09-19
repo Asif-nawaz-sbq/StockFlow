@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="960" viewBox="0 0 1280 960" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowDash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="960" fill="#ffffff"/>
+
+  <!-- Header -->
+  <text x="32" y="40" font-size="21" font-weight="700" fill="#0f172a">StockFlow — staging</text>
+  <text x="32" y="62" font-size="12.5" fill="#64748b">eu-central-1 · account 156275709542 · every resource below was applied by Terraform and verified in the console</text>
+
+  <!-- Internet -->
+  <rect x="556" y="86" width="168" height="34" rx="17" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="640" y="108" font-size="13" fill="#334155" text-anchor="middle">Internet (HTTP)</text>
+  <line x1="640" y1="120" x2="640" y2="146" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- WAF -->
+  <rect x="470" y="146" width="340" height="52" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="640" y="166" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">AWS WAF v2 · REGIONAL web ACL</text>
+  <text x="640" y="185" font-size="11" fill="#4338ca" text-anchor="middle">4 AWS managed rule groups + global and auth rate limits</text>
+  <line x1="640" y1="198" x2="640" y2="232" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- ================= VPC ================= -->
+  <rect x="32" y="232" width="884" height="632" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="1.6"/>
+  <text x="48" y="256" font-size="13" font-weight="700" fill="#0f172a">VPC  stockflow-staging-vpc</text>
+  <text x="252" y="256" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#64748b">10.20.0.0/16</text>
+
+  <!-- IGW -->
+  <rect x="572" y="268" width="136" height="28" rx="6" fill="#f8fafc" stroke="#475569"/>
+  <text x="640" y="287" font-size="11.5" fill="#334155" text-anchor="middle">Internet gateway</text>
+  <line x1="640" y1="296" x2="640" y2="322" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- Public subnets -->
+  <text x="56" y="320" font-size="11" font-weight="600" fill="#1d4ed8">PUBLIC SUBNETS</text>
+  <rect x="56" y="326" width="404" height="150" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-dasharray="4 3"/>
+  <rect x="488" y="326" width="404" height="150" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-dasharray="4 3"/>
+  <text x="70" y="344" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1e40af">eu-central-1a · 10.20.0.0/20</text>
+  <text x="502" y="344" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1e40af">eu-central-1b · 10.20.16.0/20</text>
+
+  <!-- ALB spans both public subnets -->
+  <rect x="78" y="354" width="792" height="56" rx="8" fill="#ffffff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="474" y="375" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">Application Load Balancer · internet-facing · listener HTTP:80</text>
+  <text x="474" y="394" font-size="11" fill="#64748b" text-anchor="middle">no HTTPS listener — there is no domain, so no ACM certificate</text>
+
+  <!-- NAT -->
+  <rect x="78" y="424" width="200" height="40" rx="6" fill="#ffffff" stroke="#475569"/>
+  <text x="178" y="440" font-size="11.5" font-weight="600" fill="#334155" text-anchor="middle">NAT gateway + EIP</text>
+  <text x="178" y="455" font-size="10" fill="#64748b" text-anchor="middle">one only, shared by both AZs</text>
+
+  <!-- Target groups -->
+  <rect x="150" y="498" width="290" height="40" rx="6" fill="#f8fafc" stroke="#475569"/>
+  <text x="295" y="514" font-size="11.5" font-weight="600" fill="#334155" text-anchor="middle">Target group · api · IP · :3001</text>
+  <text x="295" y="529" font-size="10" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#64748b" text-anchor="middle">/api/*  /docs  /docs/*  /health/*</text>
+
+  <rect x="508" y="498" width="290" height="40" rx="6" fill="#f8fafc" stroke="#475569"/>
+  <text x="653" y="514" font-size="11.5" font-weight="600" fill="#334155" text-anchor="middle">Target group · web · IP · :3000</text>
+  <text x="653" y="529" font-size="10" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#64748b" text-anchor="middle">default rule — everything else</text>
+
+  <line x1="295" y1="410" x2="295" y2="494" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="653" y1="410" x2="653" y2="494" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <!-- Private subnets -->
+  <text x="56" y="566" font-size="11" font-weight="600" fill="#475569">PRIVATE SUBNETS</text>
+  <rect x="56" y="572" width="404" height="272" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="4 3"/>
+  <rect x="488" y="572" width="404" height="272" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="4 3"/>
+  <text x="70" y="590" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#475569">eu-central-1a · 10.20.128.0/20</text>
+  <text x="502" y="590" font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#475569">eu-central-1b · 10.20.144.0/20</text>
+
+  <!-- ECS services span both private subnets -->
+  <rect x="78" y="602" width="792" height="58" rx="8" fill="#ffffff" stroke="#0f766e" stroke-width="1.5"/>
+  <text x="474" y="622" font-size="13" font-weight="600" fill="#115e59" text-anchor="middle">ECS Fargate · stockflow-staging-api · container :3001</text>
+  <text x="474" y="640" font-size="10.5" fill="#64748b" text-anchor="middle">0.5 vCPU / 1 GB · desired 1 · autoscaling 1–3 on CPU and memory · no public IP</text>
+
+  <rect x="78" y="672" width="792" height="58" rx="8" fill="#ffffff" stroke="#0f766e" stroke-width="1.5"/>
+  <text x="474" y="692" font-size="13" font-weight="600" fill="#115e59" text-anchor="middle">ECS Fargate · stockflow-staging-web · container :3000</text>
+  <text x="474" y="710" font-size="10.5" fill="#64748b" text-anchor="middle">0.25 vCPU / 0.5 GB · desired 1 · autoscaling 1–3 · Next.js, server-rendered</text>
+
+  <line x1="295" y1="538" x2="295" y2="598" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="653" y1="538" x2="653" y2="668" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <!-- Data stores -->
+  <rect x="78" y="748" width="380" height="80" rx="8" fill="#ffffff" stroke="#0f766e" stroke-width="1.5"/>
+  <text x="268" y="768" font-size="12.5" font-weight="600" fill="#115e59" text-anchor="middle">RDS PostgreSQL 16.15</text>
+  <text x="268" y="786" font-size="10.5" fill="#64748b" text-anchor="middle">db.t4g.micro · single-AZ in staging · encrypted at rest</text>
+  <text x="268" y="802" font-size="10.5" fill="#64748b" text-anchor="middle">rds.force_ssl = 1 · reachable only from the task SG</text>
+  <text x="268" y="818" font-size="10" fill="#94a3b8" text-anchor="middle">subnet group spans both AZs; production sets Multi-AZ</text>
+
+  <rect x="490" y="748" width="380" height="80" rx="8" fill="#ffffff" stroke="#0f766e" stroke-width="1.5"/>
+  <text x="680" y="768" font-size="12.5" font-weight="600" fill="#115e59" text-anchor="middle">ElastiCache Redis 7.1</text>
+  <text x="680" y="786" font-size="10.5" fill="#64748b" text-anchor="middle">cache.t4g.micro · single node, no replica in staging</text>
+  <text x="680" y="802" font-size="10.5" fill="#64748b" text-anchor="middle">TLS in transit + at rest · AUTH token required</text>
+  <text x="680" y="818" font-size="10" fill="#94a3b8" text-anchor="middle">sessions, dashboard cache, rate-limit counters</text>
+
+  <line x1="200" y1="660" x2="200" y2="744" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="720" y1="660" x2="720" y2="744" stroke="#475569" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <!-- web -> ALB for SSR -->
+  <path d="M 870 701 L 895 701 L 895 382 L 870 382" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+  <text x="906" y="530" font-size="9.5" fill="#94a3b8" transform="rotate(90 906 530)" text-anchor="middle">SSR calls /api/* via the ALB</text>
+
+  <!-- NAT egress -->
+  <path d="M 108 602 L 108 468" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+  <text x="200" y="566" font-size="10" fill="#94a3b8">— outbound only, through the NAT gateway</text>
+
+  <!-- S3 gateway endpoint -->
+  <rect x="640" y="424" width="230" height="40" rx="6" fill="#ffffff" stroke="#475569" stroke-dasharray="3 2"/>
+  <text x="755" y="440" font-size="11.5" font-weight="600" fill="#334155" text-anchor="middle">S3 gateway endpoint</text>
+  <text x="755" y="455" font-size="9.5" fill="#64748b" text-anchor="middle">ECR image layers bypass the NAT meter</text>
+
+  <!-- ================= Right column ================= -->
+  <text x="944" y="256" font-size="11" font-weight="600" fill="#475569">REGIONAL SERVICES (outside the VPC)</text>
+
+  <rect x="944" y="266" width="304" height="62" rx="8" fill="#ffffff" stroke="#475569"/>
+  <text x="960" y="286" font-size="12.5" font-weight="600" fill="#334155">Amazon ECR</text>
+  <text x="960" y="303" font-size="10.5" fill="#64748b">stockflow/api · stockflow/web</text>
+  <text x="960" y="318" font-size="10.5" fill="#64748b">immutable tags, scan on push</text>
+
+  <rect x="944" y="344" width="304" height="96" rx="8" fill="#ffffff" stroke="#475569"/>
+  <text x="960" y="364" font-size="12.5" font-weight="600" fill="#334155">Secrets Manager</text>
+  <text x="960" y="381" font-size="10.5" fill="#64748b">RDS master credentials (AWS-managed)</text>
+  <text x="960" y="396" font-size="10.5" fill="#64748b">Redis AUTH token</text>
+  <text x="960" y="411" font-size="10.5" fill="#64748b">JWT access + refresh signing keys</text>
+  <text x="960" y="429" font-size="10" fill="#94a3b8">injected as task secrets, never as env vars</text>
+
+  <rect x="944" y="456" width="304" height="96" rx="8" fill="#ffffff" stroke="#475569"/>
+  <text x="960" y="476" font-size="12.5" font-weight="600" fill="#334155">CloudWatch</text>
+  <text x="960" y="493" font-size="10.5" fill="#64748b">Container Insights on the cluster</text>
+  <text x="960" y="508" font-size="10.5" fill="#64748b">log groups /ecs/stockflow-staging-*</text>
+  <text x="960" y="523" font-size="10.5" fill="#64748b">16 alarms → SNS topic</text>
+  <text x="960" y="541" font-size="10" fill="#94a3b8">CPU, memory, unhealthy targets, 5xx, latency</text>
+
+  <path d="M 892 700 L 918 700 L 918 400 L 940 400" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+  <path d="M 892 631 L 926 631 L 926 504 L 940 504" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+  <path d="M 870 444 L 940 444 L 940 328" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+
+  <!-- Security groups note -->
+  <rect x="944" y="580" width="304" height="128" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="960" y="600" font-size="12" font-weight="600" fill="#334155">Security groups</text>
+  <text x="960" y="619" font-size="10.5" fill="#64748b">alb   ← 0.0.0.0/0 on :80 only</text>
+  <text x="960" y="635" font-size="10.5" fill="#64748b">tasks ← alb SG on :3000 / :3001</text>
+  <text x="960" y="651" font-size="10.5" fill="#64748b">db    ← tasks SG on :5432</text>
+  <text x="960" y="667" font-size="10.5" fill="#64748b">redis ← tasks SG on :6379</text>
+  <text x="960" y="688" font-size="10" fill="#94a3b8">the VPC default SG is stripped of all</text>
+  <text x="960" y="701" font-size="10" fill="#94a3b8">rules and left unused</text>
+
+  <!-- Terraform state, explicitly not runtime -->
+  <rect x="944" y="736" width="304" height="130" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-dasharray="5 4"/>
+  <text x="960" y="756" font-size="12" font-weight="600" fill="#475569">Terraform state — not runtime</text>
+  <text x="960" y="775" font-size="10.5" fill="#64748b">S3 stockflow-tfstate-156275709542</text>
+  <text x="960" y="791" font-size="10.5" fill="#64748b">versioned, encrypted, TLS-only policy</text>
+  <text x="960" y="807" font-size="10.5" fill="#64748b">locking via native .tflock object</text>
+  <text x="960" y="823" font-size="10.5" fill="#64748b">keys: staging/ · production/ · bootstrap/</text>
+  <text x="960" y="844" font-size="10" fill="#94a3b8">no DynamoDB table — deprecated since</text>
+  <text x="960" y="857" font-size="10" fill="#94a3b8">Terraform 1.11</text>
+
+  <!-- Footer note -->
+  <text x="32" y="944" font-size="10.5" fill="#94a3b8">Drawn from the applied staging state. Route 53, ACM and HTTPS are absent because no domain was registered. Production is written and plans clean, but has not been applied.</text>
+</svg>

@@ -1,0 +1,110 @@
+name: terraform apply
+
+# Staging applies automatically on push to the staging branch.
+# Production requires a manual approval, enforced by a GitHub Environment
+# protection rule rather than by anything in this file - a required reviewer on
+# the `production` environment is the gate.
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/terraform-apply.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to apply
+        required: true
+        type: choice
+        options: [staging, production]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: eu-central-1
+  TF_VERSION: 1.15.5
+
+jobs:
+  resolve:
+    name: resolve target environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.pick.outputs.environment }}
+    steps:
+      - id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "environment=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref_name }}" = "main" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+          fi
+
+  apply:
+    name: apply ${{ needs.resolve.outputs.environment }}
+    runs-on: ubuntu-latest
+    needs: resolve
+
+    # Two jobs never apply the same state at once. The S3 lock would catch it,
+    # but failing here is tidier than failing mid-apply.
+    concurrency:
+      group: tf-apply-${{ needs.resolve.outputs.environment }}
+      cancel-in-progress: false
+
+    # This is the manual approval gate for production. Configure a required
+    # reviewer on the `production` environment in repository settings.
+    environment:
+      name: ${{ needs.resolve.outputs.environment }}
+      url: ${{ steps.outputs.outputs.app_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Assume the apply role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-apply-${{ github.run_id }}
+
+      - name: terraform init
+        working-directory: infra/terraform/environments/${{ needs.resolve.outputs.environment }}
+        run: terraform init -input=false
+
+      # Plan to a file and apply that exact file, so what is applied is what
+      # was reviewed. Re-planning inside apply would race with any change
+      # merged in between.
+      - name: terraform plan
+        working-directory: infra/terraform/environments/${{ needs.resolve.outputs.environment }}
+        run: |
+          terraform plan -input=false -no-color \
+            -var-file="${{ needs.resolve.outputs.environment }}.tfvars" -out=tfplan
+
+      - name: terraform apply
+        working-directory: infra/terraform/environments/${{ needs.resolve.outputs.environment }}
+        run: terraform apply -input=false -no-color tfplan
+
+      - name: Collect outputs
+        id: outputs
+        working-directory: infra/terraform/environments/${{ needs.resolve.outputs.environment }}
+        run: |
+          echo "app_url=$(terraform output -raw application_url)" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        working-directory: infra/terraform/environments/${{ needs.resolve.outputs.environment }}
+        run: |
+          {
+            echo "## Applied \`${{ needs.resolve.outputs.environment }}\`"
+            echo
+            echo "| Output | Value |"
+            echo "|---|---|"
+            terraform output -json \
+              | jq -r 'to_entries[] | "| \(.key) | `\(.value.value)` |"'
+          } >> "$GITHUB_STEP_SUMMARY"

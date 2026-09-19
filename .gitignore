@@ -1,0 +1,77 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+
+.env
+.env.local
+.env.*.local
+!.env.example
+
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!example.tfvars
+crash.log
+crash.*.log
+
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/
+.idea/
+
+pgdata/
+redisdata/
+
+# Credential files that AWS and other consoles hand you as a download.
+# rootkey.csv landed in this directory once already.
+rootkey.csv
+accessKeys.csv
+credentials.csv
+*_accessKeys.csv
+.aws/
+*.pem
+*.p12
+id_rsa*
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+terraform.tfstate.backup
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+# Environment configuration is sizing and feature flags, not secrets, and CI
+# must read the same file a human does. Without these committed, a CI apply
+# plans against variable defaults and tears down anything they turned on.
+!environments/*/staging.tfvars
+!environments/*/production.tfvars
+!infra/terraform/environments/*/staging.tfvars
+!infra/terraform/environments/*/production.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# The global gitignore (~/.gitignore_global) carries a blanket `*.md`, which
+# silently excluded every README from this repository. A repo-level .gitignore
+# takes precedence over the global one, so this re-includes them. The
+# credential notes that rule was presumably aimed at stay excluded below.
+!*.md
+aws.md
+github-tokens.md
+ssh-keys.md
+
+# Build artifacts
+*.tsbuildinfo

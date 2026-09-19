@@ -1,0 +1,42 @@
+# Copy to staging.tfvars and adjust. Real tfvars files are gitignored.
+project     = "stockflow"
+environment = "staging"
+region      = "eu-central-1"
+owner       = "Asad"
+
+vpc_cidr = "10.20.0.0/16"
+az_count = 2
+
+# Off until the ECS services exist. Roughly EUR 32/month once enabled.
+enable_nat_gateway = false
+single_nat_gateway = true
+enable_flow_logs   = false
+
+github_owner = "asadbashir7755"
+github_repo  = "stockflow"
+
+# --- Application layer -------------------------------------------------
+# Everything below costs money. Turn on together with enable_nat_gateway.
+deploy_application = false
+
+api_image_tag = "latest"
+web_image_tag = "latest"
+
+db_instance_class = "db.t4g.micro"
+db_multi_az       = false
+
+redis_node_type     = "cache.t4g.micro"
+redis_replica_count = 0
+
+api_cpu               = 256
+api_memory            = 512
+web_cpu               = 256
+web_memory            = 512
+service_desired_count = 1
+autoscaling_min       = 1
+autoscaling_max       = 3
+
+# No domain yet, so the ALB serves HTTP on its AWS DNS name.
+certificate_arn = null
+
+# alarm_email = "you@example.com"
